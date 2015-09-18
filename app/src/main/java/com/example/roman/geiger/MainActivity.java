@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     {
                         mp1.start();
                     }
-                    view.setImageResource(R.drawable.rad);
+                    view.setImageResource(R.drawable.highrad);
                 }
                 if (last_y < 2.99)
                 {
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         mp2.pause();
                     }
                     mp3.start();
-                    view.setImageResource(R.drawable.highrad);
+                    view.setImageResource(R.drawable.pip);
                 }
             }
         }
