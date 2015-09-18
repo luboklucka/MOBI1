@@ -10,10 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class GeigerActivity extends AppCompatActivity implements SensorEventListener {
     public MediaPlayer mp1;
     public MediaPlayer mp2;
     public MediaPlayer mp3;
@@ -27,11 +26,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mp1 = MediaPlayer.create(MainActivity.this, R.raw.low_rad);
-        mp2 = MediaPlayer.create(MainActivity.this, R.raw.med_rad);
-        mp3 = MediaPlayer.create(MainActivity.this, R.raw.high_rad);
-        view = (ImageView) findViewById(R.id.activity_view);
+        setContentView(R.layout.activity_geiger);
+        mp1 = MediaPlayer.create(GeigerActivity.this, R.raw.low_rad);
+        mp2 = MediaPlayer.create(GeigerActivity.this, R.raw.med_rad);
+        mp3 = MediaPlayer.create(GeigerActivity.this, R.raw.high_rad);
+        view = (ImageView) findViewById(R.id.geiger_view);
         mInitialized = false;
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
