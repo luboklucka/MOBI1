@@ -40,6 +40,18 @@ public class GeigerActivity extends AppCompatActivity implements SensorEventList
         super.onResume();
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mp1.isPlaying()) {
+            mp1.stop();
+        }
+        if (mp2.isPlaying()) {
+            mp2.stop();
+        }
+        if (mp3.isPlaying()) {
+            mp3.stop();
+        }
+    }
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
