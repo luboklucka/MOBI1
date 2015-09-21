@@ -1,6 +1,8 @@
 package com.example.roman.geiger;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -11,17 +13,27 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
-import android.widget.TextView;
+import android.hardware.Camera;
 
+import android.hardware.Camera.Parameters;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+
+import java.io.IOException;
 import java.util.Timer;
-import java.util.TimerTask;
-
+/*
+*
+* sebastian kumor
+* */
 public class LightSaberActivity extends AppCompatActivity implements SensorEventListener {
     public MediaPlayer mp1;
     public MediaPlayer mp2;
     public MediaPlayer mp3;
     public MediaPlayer mp4;
+    public MediaPlayer mp5;
+    public MediaPlayer mp6;
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
     private static final int SHAKE_THRESHOLD = 600;
@@ -30,7 +42,7 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
     boolean isLighsaberOn=false;
     Button lightSaberBtn;
     Timer timer;
-    TextView text;
+    public static Camera cam = null;
 
 
     @Override
@@ -38,17 +50,21 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
         super.onCreate(savedInstanceState);
         mp1 = MediaPlayer.create(LightSaberActivity.this, R.raw.lightsaberon);
         mp2 = MediaPlayer.create(LightSaberActivity.this, R.raw.lightsaberoff);
+        mp3 = MediaPlayer.create(LightSaberActivity.this, R.raw.humming);
         mp4 = MediaPlayer.create(LightSaberActivity.this, R.raw.slowswing);
+        mp5 =  MediaPlayer.create(LightSaberActivity.this, R.raw.fastswing2);
+        mp6 =  MediaPlayer.create(LightSaberActivity.this, R.raw.clash);
+
+
+        cam = Camera.open();
 
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this, mAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         setContentView(R.layout.activity_light_saber);
-        text=(TextView)findViewById(R.id.force);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         turnSaberOn();
     }
 
@@ -89,39 +105,83 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+        getRidOfresources();
+
+
+    }
+
     public void turnSaberOn(){
         lightSaberBtn=(Button)findViewById(R.id.lightSaber_btn);
-        mp3 = MediaPlayer.create(LightSaberActivity.this, R.raw.humming);
+        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(50, 100));
+        lightSaberBtn.setBackgroundResource(R.drawable.lightoff);
+
          timer = new Timer();
-        lightSaberBtn.setOnClickListener(new Button.OnClickListener(){
-            public void onClick(View v){
+        lightSaberBtn.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
 
-              if (isLighsaberOn==false){
+                if (!isLighsaberOn) {
 
-                  if (mp1.isPlaying()==false) {
-                      mp1.start();
-                      isLighsaberOn = true;
+                    if (!mp1.isPlaying()) {
+                        mp1.start();
+                        isLighsaberOn = true;
+                        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(50, 300));
+                        lightSaberBtn.setBackgroundResource(R.drawable.lighton);
 
-                      mp3.start();
-                  }
-              }else{
+                        mp3.start();
 
-                  if (mp1.isPlaying()==false){
 
-                      mp2.start();
-                      mp3.pause();
-                      isLighsaberOn=false;
+                    }
+                } else {
+
+                    if (!mp1.isPlaying()) {
+
+                        mp2.start();
+                        mp3.pause();
+                        isLighsaberOn = false;
+                        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(50, 100));
+                        lightSaberBtn.setBackgroundResource(R.drawable.lightoff);
 //                      TimerTask updateProfile = new CustomTimerTask(isLighsaberOn=false);
 //                      timer.scheduleAtFixedRate(updateProfile , 0, 5000);
 //
 
-                  }
+                    }
 
-              }
+                }
 
             }
 
         });
+
+
+    }
+
+    public void getFlash(){
+
+
+        Camera.Parameters p = cam.getParameters();
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        cam.setParameters(p);
+       SurfaceTexture  mPreviewTexture = new SurfaceTexture(0);
+        try {
+            cam.setPreviewTexture(mPreviewTexture);
+        } catch (IOException ex) {
+            // Ignore
+        }
+        cam.startPreview();
+
+    }
+
+    public void getRidOfresources(){
+        mp1.release();
+        mp2.release();
+        mp3.release();
+        mp4.release();
+        mp5.release();
+        cam.release();
 
 
     }
@@ -155,77 +215,85 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
                 netForce+=z*z;    //Z axis (upwards)
 
                 netForce = Math.sqrt(netForce)-mSensorManager.GRAVITY_EARTH;    //Take the square root, minus gravity
+                // im setting the sound of the sword based on force calculated using accelerometer
 
+                if (isLighsaberOn) {
 
-                    text.setText(String.valueOf(netForce));
+                    if (!mp5.isPlaying()) {
+                        if (netForce > 1 & netForce < 4) {
 
-                if (isLighsaberOn==true) {
-                    if (netForce > 1 & netForce < 3) {
+                            if (mp4.isPlaying()) {
 
-                        if (mp4.isPlaying()) {
+                                mp4.pause();
+                                mp4.start();
+                            } else {
 
-                            mp4.pause();
-                            mp4.start();
-                        } else {
+                                mp4.start();
+                            }
 
-                            mp4.start();
                         }
+                        if (netForce < -0.1 & netForce < -4) {
 
-                    }
-                    if (netForce < -0.1 & netForce < -3) {
+                            if (mp4.isPlaying()) {
 
-                        if (mp4.isPlaying()) {
+                                mp4.pause();
+                                mp4.start();
+                            } else {
 
-                            mp4.pause();
-                            mp4.start();
-                        } else {
+                                mp4.start();
+                            }
 
-                            mp4.start();
                         }
-
                     }
+                     if(!mp4.isPlaying()) {
+                         if (netForce > 4) {
+
+                             if (mp5.isPlaying()) {
+
+                                 mp5.pause();
+                                 mp5.start();
+                                 getFlash();
+                                 cam.stopPreview();
+                             } else {
+
+                                 mp5.start();
+                             }
+
+
+                         }
+                         if (netForce < -4) {
+
+                             if (mp5.isPlaying()) {
+
+                                 mp5.pause();
+                                 mp5.start();
+                                 getFlash();
+                                 cam.stopPreview();
+
+
+                             } else {
+
+                                 mp5.start();
+                             }
+
+
+                         }
+
+                     }
+                    if (last_y < - 4.000)
+                    {
+//                        mp4.pause();
+//                        mp5.pause();
+                        mp6.start();
+                    }
+//                    if (last_y >  6.500)
+//                    {
+////                        mp4.pause();
+////                        mp5.pause();
+//                        mp6.start();
+//                    }
                 }
 
-
-//                if (last_y > 7.0000)
-//                {
-//                    mp1.start();
-//                    if (mp2.isPlaying()== true)
-//                    {
-//                        mp2.pause();
-//                    }
-//                    if (mp1.isPlaying()== false)
-//                    {
-//                        mp1.start();
-//                    }
-//                    view.setImageResource(R.drawable.rad);
-//                }
-//                if ((last_y > 3.0000) && (last_y < 6.99))
-//                {
-//                    if (mp1.isPlaying() == true)
-//                    {
-//                        mp1.pause();
-//                    }
-//                    mp2.start();
-//                    if (mp3.isPlaying())
-//                    {
-//                        mp3.pause();
-//                    }
-//                    if (mp2.isPlaying() == false)
-//                    {
-//                        mp1.start();
-//                    }
-//                    view.setImageResource(R.drawable.highrad);
-//                }
-//                if (last_y < 2.99)
-//                {
-//                    if (mp2.isPlaying()== true)
-//                    {
-//                        mp2.pause();
-//                    }
-//                    mp3.start();
-//                    view.setImageResource(R.drawable.pip);
-//                }
             }
         }
     }
