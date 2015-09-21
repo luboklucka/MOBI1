@@ -35,6 +35,8 @@ public class GeigerActivity extends AppCompatActivity implements SensorEventList
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
     protected void onResume() {
         super.onResume();
@@ -141,9 +143,10 @@ public class GeigerActivity extends AppCompatActivity implements SensorEventList
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+//
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            onBackPressed();
             return true;
         }
 
