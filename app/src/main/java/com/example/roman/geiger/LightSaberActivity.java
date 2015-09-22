@@ -1,6 +1,5 @@
 package com.example.roman.geiger;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
@@ -10,16 +9,14 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.hardware.Camera;
 
-import android.hardware.Camera.Parameters;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -48,12 +45,22 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        setContentView(R.layout.activity_light_saber);
+
         mp1 = MediaPlayer.create(LightSaberActivity.this, R.raw.lightsaberon);
         mp2 = MediaPlayer.create(LightSaberActivity.this, R.raw.lightsaberoff);
         mp3 = MediaPlayer.create(LightSaberActivity.this, R.raw.humming);
         mp4 = MediaPlayer.create(LightSaberActivity.this, R.raw.slowswing);
         mp5 =  MediaPlayer.create(LightSaberActivity.this, R.raw.fastswing2);
         mp6 =  MediaPlayer.create(LightSaberActivity.this, R.raw.clash);
+
+//        try {
+//            mp2.prepare();
+//        } catch (IOException ex) {
+//            // Ignore
+//        }
 
 
         cam = Camera.open();
@@ -62,8 +69,6 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-
-        setContentView(R.layout.activity_light_saber);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         turnSaberOn();
     }
@@ -98,11 +103,13 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+        pauseStuff();
     }
     @Override
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        resumetuff();
     }
 
     @Override
@@ -114,9 +121,16 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
 
     }
 
+
     public void turnSaberOn(){
+        if (mp2.isPlaying()){
+            mp2.stop();
+        }
         lightSaberBtn=(Button)findViewById(R.id.lightSaber_btn);
-        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(50, 100));
+        final float width =TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+        final float heigthSaber =TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
+
+        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(Math.round(width), Math.round(heigthSaber)));
         lightSaberBtn.setBackgroundResource(R.drawable.lightoff);
 
          timer = new Timer();
@@ -128,7 +142,7 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
                     if (!mp1.isPlaying()) {
                         mp1.start();
                         isLighsaberOn = true;
-                        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(50, 300));
+                        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(Math.round(width), Math.round(heigthSaber)));
                         lightSaberBtn.setBackgroundResource(R.drawable.lighton);
 
                         mp3.start();
@@ -140,13 +154,12 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
                     if (!mp1.isPlaying()) {
 
                         mp2.start();
+
                         mp3.pause();
                         isLighsaberOn = false;
-                        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(50, 100));
+                        lightSaberBtn.setLayoutParams(new LinearLayout.LayoutParams(Math.round(width), Math.round(heigthSaber)));
                         lightSaberBtn.setBackgroundResource(R.drawable.lightoff);
-//                      TimerTask updateProfile = new CustomTimerTask(isLighsaberOn=false);
-//                      timer.scheduleAtFixedRate(updateProfile , 0, 5000);
-//
+
 
                     }
 
@@ -156,6 +169,29 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
 
         });
 
+
+    }
+
+    public void pauseStuff(){
+
+
+        if(isLighsaberOn){
+
+            mp4.pause();
+            mp5.pause();
+            mp3.pause();
+        }
+
+    }
+
+    public void resumetuff(){
+
+        if(isLighsaberOn){
+
+
+            //humming
+            mp3.start();
+        }
 
     }
 
@@ -215,7 +251,7 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
                 netForce+=z*z;    //Z axis (upwards)
 
                 netForce = Math.sqrt(netForce)-mSensorManager.GRAVITY_EARTH;    //Take the square root, minus gravity
-                // im setting the sound of the sword based on force calculated using accelerometer
+                // im setting the sound of the sword based on force calculated using accelerometer and adding the light effect when certain angle is reached
 
                 if (isLighsaberOn) {
 
@@ -282,16 +318,10 @@ public class LightSaberActivity extends AppCompatActivity implements SensorEvent
                      }
                     if (last_y < - 4.000)
                     {
-//                        mp4.pause();
-//                        mp5.pause();
+
                         mp6.start();
                     }
-//                    if (last_y >  6.500)
-//                    {
-////                        mp4.pause();
-////                        mp5.pause();
-//                        mp6.start();
-//                    }
+
                 }
 
             }

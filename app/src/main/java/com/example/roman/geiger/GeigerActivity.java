@@ -53,10 +53,27 @@ public class GeigerActivity extends AppCompatActivity implements SensorEventList
         if (mp3.isPlaying()) {
             mp3.stop();
         }
+
+        getRidOfresources();
     }
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+        pauseStuff();
+    }
+
+    public void getRidOfresources(){
+        mp1.release();
+        mp2.release();
+        mp3.release();
+    }
+
+    public void pauseStuff(){
+        mp1.pause();
+        mp2.pause();
+        mp3.pause();
+
+
     }
 
     public void onSensorChanged(SensorEvent sensorEvent) {
