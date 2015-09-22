@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
         compassBtn.setOnClickListener(new Button.OnClickListener(){
             public void onClick(View v){
 
-//                Intent intent =new Intent(MainActivity.this,CompassActivity.class);
-//                startActivity(intent);
+                Intent intent =new Intent(MainActivity.this,CompassActivity.class);
+                startActivity(intent);
 
             }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.roman.geiger" >
+    <uses-feature android:name="android.hardware.screen.portrait"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <application
@@ -22,6 +23,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".CompassActivity"
+            android:label="@string/title_activity_compass" >
         </activity>
         <activity
             android:name=".LightSaberActivity"
